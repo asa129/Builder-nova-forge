@@ -12,7 +12,8 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Search } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Search, X, Filter, ChevronDown, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface SearchFiltersProps {
@@ -65,6 +66,7 @@ export function SearchFilters({
   const [additiveFilter, setAdditiveFilter] = useState("指定しない");
   const [selectedManufacturer, setSelectedManufacturer] = useState("");
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
+  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
 
   const handleGenreChange = (genre: string, checked: boolean) => {
     if (checked) {
@@ -95,189 +97,283 @@ export function SearchFilters({
     setSelectedFilters(filters);
   };
 
+  const clearAllFilters = () => {
+    setSelectedAdditives([]);
+    setAdditiveFilter("指定しない");
+    setSelectedManufacturer("");
+    setSelectedGenres([]);
+    setSelectedFilters([]);
+  };
+
+  const hasActiveFilters =
+    additiveFilter !== "指定しない" ||
+    selectedManufacturer !== "" ||
+    selectedGenres.length > 0 ||
+    selectedAdditives.length > 0;
+
   return (
-    <Card className="p-6 mb-6">
-      <div className="space-y-6">
-        {/* Main Title */}
-        <div className="text-center">
-          <h2 className="text-xl font-bold text-gray-900 mb-2">
-            成分表示でお酒を検索
-          </h2>
-        </div>
-
-        {/* Additives Section */}
-        <div className="space-y-4">
-          <div>
-            <Label className="text-sm font-medium text-gray-700">
-              添加物{" "}
-              <span className="text-gray-500">添加物を選んでください</span>
-            </Label>
-            <Select
-              value={selectedAdditives.join(",")}
-              onValueChange={(value) =>
-                setSelectedAdditives(value ? value.split(",") : [])
-              }
-            >
-              <SelectTrigger className="w-full mt-1">
-                <SelectValue placeholder="添加物を選んでください" />
-              </SelectTrigger>
-              <SelectContent>
-                {additiveOptions.map((additive) => (
-                  <SelectItem key={additive} value={additive}>
-                    {additive}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label className="text-sm font-medium text-gray-700 mb-3 block">
-              添加物で検索
-            </Label>
-            <RadioGroup
-              value={additiveFilter}
-              onValueChange={setAdditiveFilter}
-              className="flex flex-wrap gap-4"
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="あり" id="ari" />
-                <Label htmlFor="ari" className="text-sm">
-                  添加物あり
-                </Label>
+    <div className="space-y-6">
+      {/* Hero Search Section */}
+      <Card className="relative overflow-hidden bg-gradient-to-br from-white via-blue-50/30 to-purple-50/30 border-0 shadow-lg">
+        <div className="absolute inset-0 bg-grid-pattern opacity-5" />
+        <div className="relative p-8">
+          <div className="text-center space-y-6">
+            <div className="space-y-3">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full text-sm font-medium shadow-lg">
+                <Sparkles className="h-4 w-4" />
+                AI搭載検索
               </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="なし" id="nashi" />
-                <Label htmlFor="nashi" className="text-sm">
-                  なし
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="ありでない" id="aridenai" />
-                <Label htmlFor="aridenai" className="text-sm">
-                  ありでない
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="指定しない" id="shitei" />
-                <Label htmlFor="shitei" className="text-sm">
-                  指定しない
-                </Label>
-              </div>
-            </RadioGroup>
-          </div>
-        </div>
+              <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-purple-900 bg-clip-text text-transparent">
+                成分表示でお酒を検索
+              </h2>
+              <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+                アレルギーや体質に合わせて、あなたにぴったりのお酒を見つけましょう
+              </p>
+            </div>
 
-        {/* Name Search Section */}
-        <div>
-          <Label className="text-sm font-medium text-gray-700 mb-2 block">
-            お酒の名前で検索
-          </Label>
-          <Input
-            type="text"
-            placeholder="お酒の名前を入力してください"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full"
-          />
-        </div>
-
-        {/* Manufacturer Section */}
-        <div>
-          <Label className="text-sm font-medium text-gray-700">
-            メーカー{" "}
-            <span className="text-gray-500">メーカーを選んでください</span>
-          </Label>
-          <Select
-            value={selectedManufacturer}
-            onValueChange={setSelectedManufacturer}
-          >
-            <SelectTrigger className="w-full mt-1">
-              <SelectValue placeholder="メーカーを選んでください" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">すべてのメーカー</SelectItem>
-              {manufacturerOptions.map((manufacturer) => (
-                <SelectItem key={manufacturer} value={manufacturer}>
-                  {manufacturer}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Search Button */}
-        <div className="flex justify-center">
-          <Button
-            onClick={handleSearch}
-            className="px-8 py-2 bg-primary text-white hover:bg-primary/90"
-          >
-            <Search className="h-4 w-4 mr-2" />
-            検索
-          </Button>
-        </div>
-
-        {/* Alcohol Genre Section */}
-        <div>
-          <Label className="text-sm font-medium text-gray-700 mb-3 block">
-            お酒のジャンル
-          </Label>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {alcoholGenres.map((genre) => (
-              <div key={genre} className="flex items-center space-x-2">
-                <Checkbox
-                  id={genre}
-                  checked={selectedGenres.includes(genre)}
-                  onCheckedChange={(checked) =>
-                    handleGenreChange(genre, checked as boolean)
-                  }
+            {/* Main Search Input */}
+            <div className="max-w-2xl mx-auto">
+              <div className="relative group">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                <Input
+                  type="text"
+                  placeholder="お酒の名前、ブランド、成分で検索..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-12 h-14 text-lg border-2 border-gray-200 rounded-2xl focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all duration-300 shadow-sm"
                 />
-                <Label
-                  htmlFor={genre}
-                  className="text-sm font-normal cursor-pointer"
-                >
-                  {genre}
-                </Label>
               </div>
-            ))}
+            </div>
+
+            {/* Quick Search Button */}
+            <Button
+              onClick={handleSearch}
+              size="lg"
+              className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
+            >
+              <Search className="h-5 w-5 mr-2" />
+              検索する
+            </Button>
           </div>
         </div>
+      </Card>
 
-        {/* Active Filters Display */}
-        {selectedFilters.length > 0 && (
-          <div className="pt-4 border-t">
-            <div className="flex flex-wrap gap-2">
-              <span className="text-sm text-gray-600">適用中のフィルター:</span>
+      {/* Advanced Filters */}
+      <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+        <div className="p-6">
+          <button
+            onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
+            className="w-full flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-150 transition-all duration-300"
+          >
+            <div className="flex items-center gap-3">
+              <Filter className="h-5 w-5 text-gray-600" />
+              <span className="font-semibold text-gray-800">
+                詳細フィルター
+              </span>
+              {hasActiveFilters && (
+                <Badge className="bg-blue-100 text-blue-700 border-blue-200">
+                  {selectedFilters.length}件適用中
+                </Badge>
+              )}
+            </div>
+            <ChevronDown
+              className={cn(
+                "h-5 w-5 text-gray-600 transition-transform duration-300",
+                isAdvancedOpen && "rotate-180",
+              )}
+            />
+          </button>
+
+          {isAdvancedOpen && (
+            <div className="mt-6 space-y-8 animate-fade-in">
+              {/* Additives Section */}
+              <div className="space-y-4">
+                <Label className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                  🧪 添加物で絞り込み
+                </Label>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-3">
+                    <Label className="text-sm font-medium text-gray-700">
+                      特定の添加物を選択
+                    </Label>
+                    <Select
+                      value={selectedAdditives.join(",")}
+                      onValueChange={(value) =>
+                        setSelectedAdditives(value ? value.split(",") : [])
+                      }
+                    >
+                      <SelectTrigger className="h-12 rounded-xl border-2 border-gray-200 focus:border-blue-500">
+                        <SelectValue placeholder="添加物を選んでください" />
+                      </SelectTrigger>
+                      <SelectContent className="rounded-xl">
+                        {additiveOptions.map((additive) => (
+                          <SelectItem
+                            key={additive}
+                            value={additive}
+                            className="rounded-lg"
+                          >
+                            {additive}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label className="text-sm font-medium text-gray-700">
+                      添加物の条件
+                    </Label>
+                    <RadioGroup
+                      value={additiveFilter}
+                      onValueChange={setAdditiveFilter}
+                      className="grid grid-cols-2 gap-3"
+                    >
+                      {[
+                        { value: "あり", label: "添加物あり" },
+                        { value: "なし", label: "添加物なし" },
+                        { value: "ありでない", label: "こだわらない" },
+                        { value: "指定しない", label: "指定しない" },
+                      ].map((option) => (
+                        <div
+                          key={option.value}
+                          className="flex items-center space-x-2"
+                        >
+                          <RadioGroupItem
+                            value={option.value}
+                            id={option.value}
+                          />
+                          <Label
+                            htmlFor={option.value}
+                            className="text-sm cursor-pointer"
+                          >
+                            {option.label}
+                          </Label>
+                        </div>
+                      ))}
+                    </RadioGroup>
+                  </div>
+                </div>
+              </div>
+
+              {/* Manufacturer Section */}
+              <div className="space-y-4">
+                <Label className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                  🏭 メーカー
+                </Label>
+                <Select
+                  value={selectedManufacturer}
+                  onValueChange={setSelectedManufacturer}
+                >
+                  <SelectTrigger className="h-12 rounded-xl border-2 border-gray-200 focus:border-blue-500 max-w-md">
+                    <SelectValue placeholder="メーカーを選んでください" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl">
+                    <SelectItem value="all" className="rounded-lg">
+                      すべてのメーカー
+                    </SelectItem>
+                    {manufacturerOptions.map((manufacturer) => (
+                      <SelectItem
+                        key={manufacturer}
+                        value={manufacturer}
+                        className="rounded-lg"
+                      >
+                        {manufacturer}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Genre Section */}
+              <div className="space-y-4">
+                <Label className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                  🍶 お酒のジャンル
+                </Label>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {alcoholGenres.map((genre) => (
+                    <div
+                      key={genre}
+                      className="flex items-center space-x-3 p-3 rounded-xl border-2 border-gray-100 hover:border-blue-200 hover:bg-blue-50/50 transition-all duration-200"
+                    >
+                      <Checkbox
+                        id={genre}
+                        checked={selectedGenres.includes(genre)}
+                        onCheckedChange={(checked) =>
+                          handleGenreChange(genre, checked as boolean)
+                        }
+                        className="data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+                      />
+                      <Label
+                        htmlFor={genre}
+                        className="text-sm font-medium cursor-pointer flex-1"
+                      >
+                        {genre}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-100">
+                <Button
+                  onClick={handleSearch}
+                  className="flex-1 h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+                >
+                  <Search className="h-5 w-5 mr-2" />
+                  フィルターを適用
+                </Button>
+                {hasActiveFilters && (
+                  <Button
+                    onClick={clearAllFilters}
+                    variant="outline"
+                    className="h-12 px-6 rounded-xl border-2 border-gray-200 hover:border-red-300 hover:bg-red-50 hover:text-red-600 transition-all duration-300"
+                  >
+                    <X className="h-4 w-4 mr-2" />
+                    クリア
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </Card>
+
+      {/* Active Filters Display */}
+      {selectedFilters.length > 0 && (
+        <Card className="border-0 shadow-lg bg-gradient-to-r from-blue-50 to-purple-50">
+          <div className="p-6">
+            <div className="flex flex-wrap items-center gap-3">
+              <Label className="text-sm font-semibold text-gray-700">
+                適用中のフィルター:
+              </Label>
               {selectedFilters.map((filter) => (
-                <span
+                <Badge
                   key={filter}
-                  className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-primary text-white rounded-full"
+                  className="px-3 py-2 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 border border-blue-200 rounded-full font-medium hover:from-blue-200 hover:to-purple-200 transition-all duration-200 cursor-pointer"
+                  onClick={() =>
+                    setSelectedFilters(
+                      selectedFilters.filter((f) => f !== filter),
+                    )
+                  }
                 >
                   {filter}
-                  <button
-                    onClick={() =>
-                      setSelectedFilters(
-                        selectedFilters.filter((f) => f !== filter),
-                      )
-                    }
-                    className="hover:bg-white/20 rounded-full p-0.5"
-                  >
-                    ×
-                  </button>
-                </span>
+                  <X className="h-3 w-3 ml-2" />
+                </Badge>
               ))}
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setSelectedFilters([])}
-                className="h-6 px-2 text-xs text-gray-600"
+                className="text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-full"
               >
-                すべてクリア
+                すべてクリ��
               </Button>
             </div>
           </div>
-        )}
-      </div>
-    </Card>
+        </Card>
+      )}
+    </div>
   );
 }
