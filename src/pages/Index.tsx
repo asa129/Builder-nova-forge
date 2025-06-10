@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { SearchFilters } from "@/components/SearchFilters";
 import { ProductCard } from "@/components/ProductCard";
+import { AboutSection } from "@/components/AboutSection";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Wine, Search, Filter } from "lucide-react";
@@ -25,7 +26,7 @@ const mockProducts = [
     image: "/placeholder.svg",
     alcoholContent: "4.0%",
     category: "カクテル",
-    allergens: ["糖類", "香料", "酸味料", "着色���"],
+    allergens: ["糖類", "香料", "酸味料", "着色料"],
     isAllergenFree: false,
     description: "グレープの爽やかな風味。甘酸っぱい味わい。",
   },
@@ -215,24 +216,8 @@ const Index = () => {
           </Card>
         )}
 
-        {/* Information Card */}
-        <Card className="mt-12 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
-          <div className="text-center space-y-3">
-            <h3 className="text-lg font-semibold text-gray-900">
-              🍷 お酒選びのお手伝い
-            </h3>
-            <p className="text-gray-700 max-w-2xl mx-auto">
-              ア��ルギーや体質、嗜好に合わせて安心してお酒を選んでいただけるよう、
-              詳細な成分情報と検索機能を提供しています。
-            </p>
-            <div className="flex flex-wrap justify-center gap-2 pt-2">
-              <Badge variant="outline">アレルギー対応</Badge>
-              <Badge variant="outline">成分詳細</Badge>
-              <Badge variant="outline">カテゴリー検索</Badge>
-              <Badge variant="outline">アルコール度数</Badge>
-            </div>
-          </div>
-        </Card>
+        {/* About Section */}
+        <AboutSection />
       </main>
 
       {/* Footer */}
