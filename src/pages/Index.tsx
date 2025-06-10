@@ -18,6 +18,7 @@ import {
 import { useAppDispatch, useAppSelector } from "@/store";
 import { fetchAlcoholProducts } from "@/store/slices/alcoholSlice";
 import { clearAllFilters } from "@/store/slices/filterSlice";
+import { isFirebaseEnabled } from "@/firebase/config";
 
 const Index = () => {
   const dispatch = useAppDispatch();
@@ -26,121 +27,8 @@ const Index = () => {
   const { activeFilters } = useAppSelector((state) => state.filters);
 
   useEffect(() => {
-    // Load mock data for demonstration
-    const mockProducts = [
-      {
-        id: "1",
-        name: "アサヒスーパードライ",
-        brand: "アサヒビール",
-        image: "/placeholder.svg",
-        alcoholContent: "5.0%",
-        category: "ビール",
-        allergens: ["大麦", "ホップ", "米"],
-        isAllergenFree: false,
-        description: "キレの良い辛口ビール。すっきりとした後味。",
-        rating: 4.2,
-        reviewCount: 245,
-      },
-      {
-        id: "2",
-        name: "スミノフアイス ワイルドグレープ",
-        brand: "スミノフ",
-        image: "/placeholder.svg",
-        alcoholContent: "4.0%",
-        category: "カクテル",
-        allergens: ["糖類", "香料", "酸味料", "着色料"],
-        isAllergenFree: false,
-        description: "グレープの爽やかな風味。甘酸っぱい味わい。",
-        rating: 3.8,
-        reviewCount: 189,
-      },
-      {
-        id: "3",
-        name: "ほろよい 白いサワー",
-        brand: "サントリー",
-        image: "/placeholder.svg",
-        alcoholContent: "3.0%",
-        category: "チューハイ",
-        allergens: ["糖類", "酸味料", "香料"],
-        isAllergenFree: false,
-        description: "まろやかで飲みやすい。低アルコールでやさしい味。",
-        rating: 4.1,
-        reviewCount: 312,
-      },
-      {
-        id: "4",
-        name: "ほろよい ハピクルサワー",
-        brand: "サントリー",
-        image: "/placeholder.svg",
-        alcoholContent: "3.0%",
-        category: "チューハイ",
-        allergens: ["糖類", "酸味料", "香料", "乳酸"],
-        isAllergenFree: false,
-        description: "乳酸菌飲料のような爽やかな酸味とまろやかさ。",
-        rating: 3.9,
-        reviewCount: 156,
-      },
-      {
-        id: "5",
-        name: "本条の檸檬酒 オリジナルレモンサワー",
-        brand: "本条",
-        image: "/placeholder.svg",
-        alcoholContent: "7.0%",
-        category: "レモンサワー",
-        allergens: ["レモン果汁", "糖類", "酸味料"],
-        isAllergenFree: false,
-        description: "瀬戸内産レモンを使用。本格的な酸味とキレ。",
-        rating: 4.3,
-        reviewCount: 98,
-      },
-      {
-        id: "6",
-        name: "本条の檸檬酒 ブルーベリーサワー",
-        brand: "本条",
-        image: "/placeholder.svg",
-        alcoholContent: "7.0%",
-        category: "フルーツサワー",
-        allergens: ["ブルーベリー果汁", "糖類", "酸味料"],
-        isAllergenFree: false,
-        description: "ブルーベリーの甘酸っぱさが楽しめるサワー",
-        rating: 4.0,
-        reviewCount: 76,
-      },
-      {
-        id: "7",
-        name: "アサヒ 贅沢搾り グレープフルーツ",
-        brand: "アサヒ",
-        image: "/placeholder.svg",
-        alcoholContent: "4.0%",
-        category: "チューハイ",
-        allergens: ["グレープフルーツ果汁", "糖類"],
-        isAllergenFree: false,
-        description: "贅沢に搾ったグレープフルーツの果汁感",
-        rating: 4.1,
-        reviewCount: 167,
-      },
-      {
-        id: "8",
-        name: "スミノフアイス",
-        brand: "スミノフ",
-        image: "/placeholder.svg",
-        alcoholContent: "4.0%",
-        category: "カクテル",
-        allergens: ["糖類", "香料"],
-        isAllergenFree: false,
-        description: "プレミアムウォッカベースのアイスカクテル",
-        rating: 3.7,
-        reviewCount: 203,
-      },
-    ];
-
-    // In a real app, this would be:
-    // dispatch(fetchAlcoholProducts());
-    // For now, set mock data directly
-    dispatch({
-      type: "alcohol/fetchAlcoholProducts/fulfilled",
-      payload: mockProducts,
-    });
+    // Fetch alcohol products (will use mock data if Firebase is not configured)
+    dispatch(fetchAlcoholProducts());
   }, [dispatch]);
 
   const handleClearAll = () => {
@@ -235,6 +123,14 @@ const Index = () => {
                     {totalCount}商品
                   </span>
                 </div>
+                {!isFirebaseEnabled && (
+                  <div className="flex items-center gap-2 px-3 py-2 bg-yellow-100 rounded-full">
+                    <span className="h-4 w-4 text-yellow-600">⚠️</span>
+                    <span className="text-sm font-medium text-yellow-700">
+                      デモモード
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
