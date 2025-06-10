@@ -3,20 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ExternalLink, Info, Star, Heart } from "lucide-react";
 import { useState } from "react";
+import { useAppDispatch, useAppSelector } from "@/store";
+import { toggleFavoriteProduct } from "@/store/slices/userSlice";
+import { AlcoholProduct } from "@/store/slices/alcoholSlice";
 
-interface ProductCardProps {
-  id: string;
-  name: string;
-  brand?: string;
-  image: string;
-  alcoholContent?: string;
-  category: string;
-  allergens?: string[];
-  isAllergenFree?: boolean;
-  description?: string;
-}
+type ProductCardProps = AlcoholProduct;
 
 export function ProductCard({
+  id,
   name,
   brand,
   image,
@@ -25,9 +19,18 @@ export function ProductCard({
   allergens = [],
   isAllergenFree = false,
   description,
+  rating = 4.0,
+  reviewCount = 127,
 }: ProductCardProps) {
-  const [isFavorited, setIsFavorited] = useState(false);
+  const dispatch = useAppDispatch();
+  const { preferences } = useAppSelector((state) => state.user);
   const [isHovered, setIsHovered] = useState(false);
+
+  const isFavorited = preferences.favoriteProducts.includes(id);
+
+  const handleToggleFavorite = () => {
+    dispatch(toggleFavoriteProduct(id));
+  };
 
   return (
     <Card
@@ -78,7 +81,7 @@ export function ProductCard({
 
           {/* Favorite Button */}
           <button
-            onClick={() => setIsFavorited(!isFavorited)}
+            onClick={handleToggleFavorite}
             className={`absolute top-3 right-3 p-2 rounded-full backdrop-blur-sm transition-all duration-300 ${
               isFavorited
                 ? "bg-red-500 text-white shadow-lg"
@@ -171,20 +174,24 @@ export function ProductCard({
             </Button>
           </div>
 
-          {/* Rating Stars (placeholder) */}
+          {/* Rating Stars */}
           <div className="flex items-center justify-between pt-2 border-t border-gray-100">
             <div className="flex items-center gap-1">
               {[...Array(5)].map((_, i) => (
                 <Star
                   key={i}
                   className={`h-3 w-3 ${
-                    i < 4 ? "text-yellow-400 fill-current" : "text-gray-300"
+                    i < Math.floor(rating)
+                      ? "text-yellow-400 fill-current"
+                      : "text-gray-300"
                   }`}
                 />
               ))}
-              <span className="text-xs text-gray-500 ml-1">4.0</span>
+              <span className="text-xs text-gray-500 ml-1">{rating}</span>
             </div>
-            <span className="text-xs text-gray-500">レビュー: 127件</span>
+            <span className="text-xs text-gray-500">
+              レビュー: {reviewCount}件
+            </span>
           </div>
         </div>
       </CardContent>

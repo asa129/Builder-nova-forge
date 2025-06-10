@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -15,13 +15,19 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Search, X, Filter, ChevronDown, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-interface SearchFiltersProps {
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
-  selectedFilters: string[];
-  setSelectedFilters: (filters: string[]) => void;
-}
+import { useAppDispatch, useAppSelector } from "@/store";
+import {
+  setSelectedAdditives,
+  setAdditiveFilter,
+  setSelectedManufacturer,
+  setSelectedGenres,
+  toggleGenre,
+  setIsAdvancedOpen,
+  applyFilters,
+  clearAllFilters,
+  removeFilter,
+} from "@/store/slices/filterSlice";
+import { setSearchQuery, filterProducts } from "@/store/slices/alcoholSlice";
 
 const additiveOptions = [
   "香料",
@@ -56,54 +62,44 @@ const alcoholGenres = [
   "リキュール",
 ];
 
-export function SearchFilters({
-  searchQuery,
-  setSearchQuery,
-  selectedFilters,
-  setSelectedFilters,
-}: SearchFiltersProps) {
-  const [selectedAdditives, setSelectedAdditives] = useState<string[]>([]);
-  const [additiveFilter, setAdditiveFilter] = useState("指定しない");
-  const [selectedManufacturer, setSelectedManufacturer] = useState("");
-  const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
-  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
+export function SearchFilters() {
+  const dispatch = useAppDispatch();
+  const { searchQuery } = useAppSelector((state) => state.alcohol);
+  const {
+    selectedAdditives,
+    additiveFilter,
+    selectedManufacturer,
+    selectedGenres,
+    isAdvancedOpen,
+    activeFilters,
+  } = useAppSelector((state) => state.filters);
 
-  const handleGenreChange = (genre: string, checked: boolean) => {
-    if (checked) {
-      setSelectedGenres([...selectedGenres, genre]);
-    } else {
-      setSelectedGenres(selectedGenres.filter((g) => g !== genre));
-    }
-  };
+  const handleGenreChange = useCallback(
+    (genre: string, checked: boolean) => {
+      dispatch(toggleGenre(genre));
+    },
+    [dispatch],
+  );
 
-  const handleSearch = () => {
-    const filters: string[] = [];
+  const handleSearch = useCallback(() => {
+    dispatch(applyFilters());
+    dispatch(filterProducts({ query: searchQuery, filters: activeFilters }));
+  }, [dispatch, searchQuery, activeFilters]);
 
-    // Add additive filter
-    if (additiveFilter === "なし") {
-      filters.push("添加物なし");
-    } else if (additiveFilter === "あり" && selectedAdditives.length > 0) {
-      filters.push(...selectedAdditives);
-    }
+  const handleClearAllFilters = useCallback(() => {
+    dispatch(clearAllFilters());
+    dispatch(filterProducts({ query: "", filters: [] }));
+    dispatch(setSearchQuery(""));
+  }, [dispatch]);
 
-    // Add manufacturer filter
-    if (selectedManufacturer && selectedManufacturer !== "all") {
-      filters.push(selectedManufacturer);
-    }
-
-    // Add genre filters
-    filters.push(...selectedGenres);
-
-    setSelectedFilters(filters);
-  };
-
-  const clearAllFilters = () => {
-    setSelectedAdditives([]);
-    setAdditiveFilter("指定しない");
-    setSelectedManufacturer("");
-    setSelectedGenres([]);
-    setSelectedFilters([]);
-  };
+  const handleRemoveFilter = useCallback(
+    (filter: string) => {
+      dispatch(removeFilter(filter));
+      const updatedFilters = activeFilters.filter((f) => f !== filter);
+      dispatch(filterProducts({ query: searchQuery, filters: updatedFilters }));
+    },
+    [dispatch, activeFilters, searchQuery],
+  );
 
   const hasActiveFilters =
     additiveFilter !== "指定しない" ||
@@ -139,7 +135,7 @@ export function SearchFilters({
                   type="text"
                   placeholder="お酒の名前、ブランド、成分で検索..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => dispatch(setSearchQuery(e.target.value))}
                   className="pl-12 h-14 text-lg border-2 border-gray-200 rounded-2xl focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all duration-300 shadow-sm"
                 />
               </div>
@@ -162,7 +158,7 @@ export function SearchFilters({
       <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
         <div className="p-6">
           <button
-            onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
+            onClick={() => dispatch(setIsAdvancedOpen(!isAdvancedOpen))}
             className="w-full flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-150 transition-all duration-300"
           >
             <div className="flex items-center gap-3">
@@ -172,7 +168,7 @@ export function SearchFilters({
               </span>
               {hasActiveFilters && (
                 <Badge className="bg-blue-100 text-blue-700 border-blue-200">
-                  {selectedFilters.length}件適用中
+                  {activeFilters.length}件適用中
                 </Badge>
               )}
             </div>
@@ -200,7 +196,9 @@ export function SearchFilters({
                     <Select
                       value={selectedAdditives.join(",")}
                       onValueChange={(value) =>
-                        setSelectedAdditives(value ? value.split(",") : [])
+                        dispatch(
+                          setSelectedAdditives(value ? value.split(",") : []),
+                        )
                       }
                     >
                       <SelectTrigger className="h-12 rounded-xl border-2 border-gray-200 focus:border-blue-500">
@@ -226,7 +224,17 @@ export function SearchFilters({
                     </Label>
                     <RadioGroup
                       value={additiveFilter}
-                      onValueChange={setAdditiveFilter}
+                      onValueChange={(value) =>
+                        dispatch(
+                          setAdditiveFilter(
+                            value as
+                              | "あり"
+                              | "なし"
+                              | "ありでない"
+                              | "指定しない",
+                          ),
+                        )
+                      }
                       className="grid grid-cols-2 gap-3"
                     >
                       {[
@@ -263,7 +271,9 @@ export function SearchFilters({
                 </Label>
                 <Select
                   value={selectedManufacturer}
-                  onValueChange={setSelectedManufacturer}
+                  onValueChange={(value) =>
+                    dispatch(setSelectedManufacturer(value))
+                  }
                 >
                   <SelectTrigger className="h-12 rounded-xl border-2 border-gray-200 focus:border-blue-500 max-w-md">
                     <SelectValue placeholder="メーカーを選んでください" />
@@ -326,7 +336,7 @@ export function SearchFilters({
                 </Button>
                 {hasActiveFilters && (
                   <Button
-                    onClick={clearAllFilters}
+                    onClick={handleClearAllFilters}
                     variant="outline"
                     className="h-12 px-6 rounded-xl border-2 border-gray-200 hover:border-red-300 hover:bg-red-50 hover:text-red-600 transition-all duration-300"
                   >
@@ -341,22 +351,18 @@ export function SearchFilters({
       </Card>
 
       {/* Active Filters Display */}
-      {selectedFilters.length > 0 && (
+      {activeFilters.length > 0 && (
         <Card className="border-0 shadow-lg bg-gradient-to-r from-blue-50 to-purple-50">
           <div className="p-6">
             <div className="flex flex-wrap items-center gap-3">
               <Label className="text-sm font-semibold text-gray-700">
                 適用中のフィルター:
               </Label>
-              {selectedFilters.map((filter) => (
+              {activeFilters.map((filter) => (
                 <Badge
                   key={filter}
                   className="px-3 py-2 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 border border-blue-200 rounded-full font-medium hover:from-blue-200 hover:to-purple-200 transition-all duration-200 cursor-pointer"
-                  onClick={() =>
-                    setSelectedFilters(
-                      selectedFilters.filter((f) => f !== filter),
-                    )
-                  }
+                  onClick={() => handleRemoveFilter(filter)}
                 >
                   {filter}
                   <X className="h-3 w-3 ml-2" />
@@ -365,10 +371,10 @@ export function SearchFilters({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setSelectedFilters([])}
+                onClick={handleClearAllFilters}
                 className="text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-full"
               >
-                すべてクリ��
+                すべてクリア
               </Button>
             </div>
           </div>
