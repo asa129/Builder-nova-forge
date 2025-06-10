@@ -8,7 +8,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { store } from "@/store";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "@/firebase/config";
+import { auth, isFirebaseEnabled } from "@/firebase/config";
 import { useAppDispatch } from "@/store";
 import { setUser, clearUser, setLoading } from "@/store/slices/userSlice";
 import Index from "./pages/Index";
@@ -31,22 +31,34 @@ function AuthListener() {
   useEffect(() => {
     dispatch(setLoading(true));
 
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        dispatch(
-          setUser({
-            userId: user.uid,
-            email: user.email || "",
-            displayName: user.displayName || "",
-          }),
-        );
-      } else {
-        dispatch(clearUser());
-      }
+    // Only set up auth listener if Firebase is enabled and auth is available
+    if (!isFirebaseEnabled || !auth) {
+      console.log("Firebase not configured - skipping authentication");
       dispatch(setLoading(false));
-    });
+      return;
+    }
 
-    return () => unsubscribe();
+    try {
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        if (user) {
+          dispatch(
+            setUser({
+              userId: user.uid,
+              email: user.email || "",
+              displayName: user.displayName || "",
+            }),
+          );
+        } else {
+          dispatch(clearUser());
+        }
+        dispatch(setLoading(false));
+      });
+
+      return () => unsubscribe();
+    } catch (error) {
+      console.error("Auth listener error:", error);
+      dispatch(setLoading(false));
+    }
   }, [dispatch]);
 
   return null;
