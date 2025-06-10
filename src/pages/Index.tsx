@@ -5,18 +5,18 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Wine, Search, Filter } from "lucide-react";
 
-// Mock data for demonstration
+// Mock data for demonstration - realistic alcohol products
 const mockProducts = [
   {
     id: "1",
-    name: "アサヒビールウルトラキレイザー",
+    name: "アサヒスーパードライ",
     brand: "アサヒビール",
     image: "/placeholder.svg",
     alcoholContent: "5.0%",
     category: "ビール",
-    allergens: ["麦", "ホップ"],
+    allergens: ["大麦", "ホップ", "米"],
     isAllergenFree: false,
-    description: "キレのある爽やかな味わいのビール",
+    description: "キレの良い辛口ビール。すっきりとした後味。",
   },
   {
     id: "2",
@@ -25,9 +25,9 @@ const mockProducts = [
     image: "/placeholder.svg",
     alcoholContent: "4.0%",
     category: "カクテル",
-    allergens: ["糖質", "香料"],
+    allergens: ["糖類", "香料", "酸味料", "着色���"],
     isAllergenFree: false,
-    description: "グレープの風味が楽しめるプレミアムカクテル",
+    description: "グレープの爽やかな風味。甘酸っぱい味わい。",
   },
   {
     id: "3",
@@ -36,9 +36,9 @@ const mockProducts = [
     image: "/placeholder.svg",
     alcoholContent: "3.0%",
     category: "チューハイ",
-    allergens: ["糖��", "酸味料"],
+    allergens: ["糖類", "酸味料", "香料"],
     isAllergenFree: false,
-    description: "やさしい甘さの低アルコールドリンク",
+    description: "まろやかで飲みやすい。低アルコールでやさしい味。",
   },
   {
     id: "4",
@@ -47,9 +47,9 @@ const mockProducts = [
     image: "/placeholder.svg",
     alcoholContent: "3.0%",
     category: "チューハイ",
-    allergens: ["糖質", "乳酸菌"],
+    allergens: ["糖類", "酸味料", "香料", "乳酸"],
     isAllergenFree: false,
-    description: "乳酸菌飲料風味のユニークなサワー",
+    description: "乳酸菌飲料のような爽やかな酸味とまろやかさ。",
   },
   {
     id: "5",
@@ -58,9 +58,9 @@ const mockProducts = [
     image: "/placeholder.svg",
     alcoholContent: "7.0%",
     category: "レモンサワー",
-    allergens: ["レモン", "糖質"],
+    allergens: ["レモン果汁", "糖類", "酸味料"],
     isAllergenFree: false,
-    description: "本格檸檬の風味を活かしたレモンサワー",
+    description: "瀬戸内産レモンを使用。本格的な酸味とキレ。",
   },
   {
     id: "6",
@@ -68,7 +68,7 @@ const mockProducts = [
     brand: "本条",
     image: "/placeholder.svg",
     alcoholContent: "7.0%",
-    category: "フルーツサワ���",
+    category: "フルーツサワー",
     allergens: ["ブルーベリー", "糖質"],
     isAllergenFree: false,
     description: "ブルーベリーの甘酸っぱさが楽しめるサワー",
@@ -222,7 +222,7 @@ const Index = () => {
               🍷 お酒選びのお手伝い
             </h3>
             <p className="text-gray-700 max-w-2xl mx-auto">
-              アレルギーや体質、嗜好に合わせて安心してお酒を選んでいただけるよう、
+              ア��ルギーや体質、嗜好に合わせて安心してお酒を選んでいただけるよう、
               詳細な成分情報と検索機能を提供しています。
             </p>
             <div className="flex flex-wrap justify-center gap-2 pt-2">
