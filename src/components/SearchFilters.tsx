@@ -85,7 +85,7 @@ export function SearchFilters({
     }
 
     // Add manufacturer filter
-    if (selectedManufacturer) {
+    if (selectedManufacturer && selectedManufacturer !== "all") {
       filters.push(selectedManufacturer);
     }
 
@@ -196,7 +196,7 @@ export function SearchFilters({
               <SelectValue placeholder="メーカーを選んでください" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">すべてのメーカー</SelectItem>
+              <SelectItem value="all">すべてのメーカー</SelectItem>
               {manufacturerOptions.map((manufacturer) => (
                 <SelectItem key={manufacturer} value={manufacturer}>
                   {manufacturer}

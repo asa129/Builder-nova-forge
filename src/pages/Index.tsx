@@ -137,6 +137,11 @@ const Index = () => {
             return product.brand === filter;
           }
 
+          // Skip 'all' manufacturer filter as it means no filter
+          if (filter === "all") {
+            return true;
+          }
+
           // Handle genre filters
           if (
             [
@@ -192,7 +197,7 @@ const Index = () => {
             </h1>
           </div>
           <p className="text-gray-600 text-sm">
-            アレルギーや体質に合わせて、安心してお酒を選べる検索サイトです
+            アレルギーや体質に合わせて、安心し���お酒を選べる検索サイトです
           </p>
         </div>
       </header>
