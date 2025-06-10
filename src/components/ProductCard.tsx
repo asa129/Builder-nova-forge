@@ -29,13 +29,30 @@ export function ProductCard({
     <Card className="card-hover h-full">
       <CardContent className="p-0">
         {/* Product Image */}
-        <div className="aspect-square w-full bg-gray-50 rounded-t-lg overflow-hidden">
+        <div className="aspect-square w-full bg-gradient-to-br from-gray-50 to-gray-100 rounded-t-lg overflow-hidden relative">
           <img
             src={image}
             alt={name}
-            className="w-full h-full object-contain p-4"
+            className="w-full h-full object-contain p-4 transition-transform duration-300 hover:scale-105"
             loading="lazy"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = `data:image/svg+xml;base64,${btoa(`
+                <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+                  <rect width="200" height="200" fill="#f3f4f6"/>
+                  <circle cx="100" cy="100" r="40" fill="#e5e7eb"/>
+                  <text x="100" y="140" text-anchor="middle" font-family="system-ui" font-size="12" fill="#6b7280">No Image</text>
+                </svg>
+              `)}`;
+            }}
           />
+          {isAllergenFree && (
+            <div className="absolute top-2 right-2">
+              <Badge className="text-xs bg-success text-white shadow-sm">
+                添加物なし
+              </Badge>
+            </div>
+          )}
         </div>
 
         {/* Product Info */}
@@ -45,11 +62,6 @@ export function ProductCard({
             <Badge variant="secondary" className="text-xs">
               {category}
             </Badge>
-            {isAllergenFree && (
-              <Badge className="text-xs bg-success text-white">
-                添加物なし
-              </Badge>
-            )}
           </div>
 
           {/* Product Name */}
