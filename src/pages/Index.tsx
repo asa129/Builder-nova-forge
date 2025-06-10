@@ -112,28 +112,66 @@ const Index = () => {
         product.brand?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         product.category.toLowerCase().includes(searchQuery.toLowerCase());
 
-      // Category filter
+      // Filters
       const matchesFilters =
         selectedFilters.length === 0 ||
-        selectedFilters.some((filter) => {
-          switch (filter) {
-            case "アルコール低め":
-              return (
-                parseFloat(product.alcoholContent?.replace("%", "") || "0") <= 4
-              );
-            case "ビール":
-              return product.category === "ビール";
-            case "カクテル":
-              return product.category === "カクテル";
-            case "チューハイ":
-              return product.category === "チューハイ";
-            case "添加物なし":
-              return product.isAllergenFree;
-            case "糖質":
-              return product.allergens.some((a) => a.includes("糖質"));
-            default:
-              return true;
+        selectedFilters.every((filter) => {
+          // Handle additive filters
+          if (filter === "添加物なし") {
+            return product.isAllergenFree;
           }
+
+          // Handle manufacturer filters
+          if (
+            [
+              "アサヒビール",
+              "キリンビール",
+              "サントリー",
+              "サッポロビール",
+              "スミノフ",
+              "本条",
+              "宝酒造",
+              "チョーヤ",
+            ].includes(filter)
+          ) {
+            return product.brand === filter;
+          }
+
+          // Handle genre filters
+          if (
+            [
+              "チューハイ",
+              "カクテル",
+              "ビール",
+              "日本酒",
+              "焼酎",
+              "ワイン",
+              "ウイスキー",
+              "リキュール",
+            ].includes(filter)
+          ) {
+            return product.category === filter;
+          }
+
+          // Handle specific additive filters
+          if (
+            [
+              "香料",
+              "着色料",
+              "保存料",
+              "酸味料",
+              "甘味料",
+              "安定剤",
+              "乳化剤",
+              "増粘剤",
+            ].includes(filter)
+          ) {
+            return product.allergens.some((allergen) =>
+              allergen.includes(filter),
+            );
+          }
+
+          return true;
         });
 
       return matchesSearch && matchesFilters;
